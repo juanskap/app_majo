@@ -1,0 +1,108 @@
+<?php
+/** @var array $proyecto */
+/** @var array $etapas */
+use App\Core\Auth;
+use App\Core\Request;
+$rol = Auth::role();
+?>
+
+<div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900"><?= e($proyecto['codigo']) ?></h1>
+        <p class="text-gray-500"><?= e($proyecto['nombre']) ?></p>
+    </div>
+    <div class="flex gap-2">
+        <a href="<?= url('proyectos') ?>" class="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg text-sm">← Proyectos</a>
+        <a href="<?= url('plan/' . $proyecto['id']) ?>" class="px-4 py-2 text-indigo-600 hover:text-indigo-800 border border-indigo-300 rounded-lg text-sm">Plan de actividades</a>
+        <?php if ($rol === 'admin'): ?>
+        <a href="<?= url('proyectos/asignar/' . $proyecto['id']) ?>" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition">Asignar tutor</a>
+        <?php endif; ?>
+    </div>
+</div>
+
+<!-- Datos generales -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white rounded-xl shadow p-4">
+        <p class="text-xs text-gray-500 uppercase">Tipo de proyecto</p>
+        <p class="font-semibold mt-1"><?= e($proyecto['tipo_proyecto']) ?></p>
+    </div>
+    <div class="bg-white rounded-xl shadow p-4">
+        <p class="text-xs text-gray-500 uppercase">Estudiante</p>
+        <p class="font-semibold mt-1"><?= e($proyecto['estudiante_nombre']) ?></p>
+        <p class="text-xs text-gray-400"><?= e($proyecto['carrera'] ?? '') ?> · <?= e($proyecto['estudiante_codigo'] ?? '') ?></p>
+    </div>
+    <div class="bg-white rounded-xl shadow p-4">
+        <p class="text-xs text-gray-500 uppercase">Tutor</p>
+        <p class="font-semibold mt-1"><?= e($proyecto['tutor_nombre'] ?? 'Sin asignar') ?></p>
+        <p class="text-xs text-gray-400"><?= $proyecto['tutor_nombre'] ? 'Tutoría activa' : 'Pendiente de asignación' ?></p>
+    </div>
+    <div class="bg-white rounded-xl shadow p-4">
+        <p class="text-xs text-gray-500 uppercase">Estado</p>
+        <span class="inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-semibold <?= e(estado_badge($proyecto['estado'])) ?>"><?= e(ucwords(str_replace('_', ' ', $proyecto['estado']))) ?></span>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Etapas -->
+    <div class="lg:col-span-2 bg-white rounded-xl shadow p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="font-semibold text-gray-900">Etapas del proyecto</h2>
+            <div class="flex items-center gap-2 text-sm">
+                <span class="text-gray-500">Avance total:</span>
+                <span class="font-bold text-indigo-600"><?= (float) $proyecto['porcentaje_avance'] ?>%</span>
+            </div>
+        </div>
+
+        <div class="h-2 bg-gray-200 rounded-full overflow-hidden mb-5">
+            <div class="h-full bg-indigo-500 rounded-full transition-all" style="width: <?= (float) $proyecto['porcentaje_avance'] ?>%"></div>
+        </div>
+
+        <ol class="space-y-2">
+            <?php foreach ($etapas as $i => $et): ?>
+            <li class="flex items-center gap-3 p-3 rounded-lg <?= $et['estado_etapa'] === 'aprobada' ? 'bg-green-50 border border-green-200' : 'bg-gray-50' ?>">
+                <span class="w-8 h-8 flex items-center justify-center rounded-full text-xs font-bold <?= $et['estado_etapa'] === 'aprobada' ? 'bg-green-500 text-white' : 'bg-indigo-100 text-indigo-700' ?>">
+                    <?= $et['estado_etapa'] === 'aprobada' ? '✓' : $i + 1 ?>
+                </span>
+                <div class="flex-1">
+                    <p class="font-medium text-sm"><?= e($et['nombre']) ?></p>
+                    <p class="text-xs text-gray-400">
+                        <?php if ($et['estado_etapa'] === 'aprobada'): ?>
+                            Etapa aprobada · <?= e($et['final_nombre'] ?? 'Documento final') ?>
+                        <?php elseif ($et['trabajo_id']): ?>
+                            Documento v<?= (int) $et['trabajo_version'] ?> · <?= e(ucwords(str_replace('_', ' ', $et['trabajo_estado']))) ?>
+                        <?php else: ?>
+                            Pendiente de documento
+                        <?php endif; ?>
+                    </p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <?php if ($et['trabajo_id']): ?>
+                    <a href="<?= url('documentos/ver/' . $et['trabajo_id']) ?>" class="text-xs px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">Ver documento</a>
+                    <?php endif; ?>
+                    <?php if ($et['estado_etapa'] === 'aprobada' && $et['final_id']): ?>
+                    <a href="<?= url('documentos/ver/' . $et['final_id']) ?>" class="text-xs px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg">Final</a>
+                    <?php endif; ?>
+                    <?php if ($rol === 'estudiante' && $et['estado_etapa'] !== 'aprobada'): ?>
+                    <a href="<?= url('documentos/subir-form/' . $proyecto['id'] . '/' . $et['id']) ?>" class="text-xs px-3 py-1.5 bg-slate-700 hover:bg-slate-800 text-white rounded-lg">Subir documento</a>
+                    <?php endif; ?>
+                </div>
+            </li>
+            <?php endforeach; ?>
+        </ol>
+    </div>
+
+    <!-- Información adicional -->
+    <div class="space-y-6">
+        <div class="bg-white rounded-xl shadow p-5">
+            <h2 class="font-semibold text-gray-900 mb-3">Detalles</h2>
+            <dl class="space-y-2 text-sm">
+                <div class="flex justify-between"><dt class="text-gray-500">Código</dt><dd class="font-medium"><?= e($proyecto['codigo']) ?></dd></div>
+                <div class="flex justify-between"><dt class="text-gray-500">Creado</dt><dd><?= e(format_date($proyecto['fecha_creacion'])) ?></dd></div>
+                <div class="flex justify-between"><dt class="text-gray-500">Fecha límite</dt><dd><?= e($proyecto['fecha_limite'] ? date('d/m/Y', strtotime($proyecto['fecha_limite'])) : '—') ?></dd></div>
+            </dl>
+            <?php if ($proyecto['descripcion']): ?>
+            <p class="text-sm text-gray-600 mt-3 border-t pt-3"><?= nl2br(e($proyecto['descripcion'])) ?></p>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
