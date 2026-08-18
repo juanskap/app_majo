@@ -23,6 +23,6 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Errores en desarrollo
+// Errores: solo se muestran en pantalla en modo depuración
 error_reporting(E_ALL);
-ini_set('display_errors', '1');
+ini_set('display_errors', APP_DEBUG ? '1' : '0');

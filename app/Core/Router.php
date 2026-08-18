@@ -23,11 +23,14 @@ class Router
         'plan' => 'PlanController',
         'calendario' => 'CalendarioController',
         'notificaciones' => 'NotificacionController',
+        'perfil' => 'PerfilController',
+        'historial' => 'HistorialController',
     ];
 
     public function dispatch(string $url): void
     {
         $segments = array_values(array_filter(explode('/', trim($url, '/')), fn ($s) => $s !== ''));
+        $_SESSION['__current'] = strtolower($segments[0] ?? 'dashboard');
 
         if (!empty($segments[0])) {
             $key = strtolower($segments[0]);

@@ -16,9 +16,9 @@ abstract class Controller
     }
 
     /** Renderiza una vista con datos */
-    protected function view(string $view, array $data = []): void
+    protected function view(string $view, array $data = [], ?string $layout = 'layouts/main'): void
     {
-        View::render($view, $data);
+        View::render($view, $data, $layout);
     }
 
     /** Redirige a una ruta interna */

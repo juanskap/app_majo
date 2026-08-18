@@ -16,13 +16,13 @@ class AuthController extends Controller
     }
 
     /** Muestra el formulario de inicio de sesión (GET) o lo procesa (POST) */
-    public function login(): void
+public function login(): void
     {
         if (Request::isGet()) {
             if (Auth::check()) {
                 redirect_to('dashboard');
             }
-            $this->view('auth/login', ['title' => 'Iniciar sesión']);
+            $this->view('auth/login', ['title' => 'Iniciar sesión'], 'layouts/auth');
             return;
         }
 
@@ -66,8 +66,8 @@ class AuthController extends Controller
     /** Formulario para solicitar recuperación de contraseña */
     public function olvide(): void
     {
-        if (Request::isGet()) {
-            $this->view('auth/olvide', ['title' => 'Recuperar contraseña']);
+if (Request::isGet()) {
+            $this->view('auth/olvide', ['title' => 'Recuperar contraseña'], 'layouts/auth');
             return;
         }
         $this->enviar();
@@ -136,10 +136,10 @@ class AuthController extends Controller
             redirect_to('auth/olvide');
         }
 
-        $this->view('auth/restablecer', [
+$this->view('auth/restablecer', [
             'title' => 'Nueva contraseña',
             'token' => $token,
-        ]);
+        ], 'layouts/auth');
     }
 
     /** Procesa el cambio de contraseña */

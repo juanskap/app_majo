@@ -1,13 +1,14 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # Si ya se accede a public/ no reescribir de nuevo
-    RewriteCond %{REQUEST_URI} !^/guia_academica/public/
+    # Si se accede directamente a public/ no reescribir
+    RewriteCond %{REQUEST_URI} (^|/)public/(.*)$ [NC]
+    RewriteRule ^ - [L]
+
     # Redirigir la raíz hacia public/
     RewriteRule ^$ public/ [L]
 
     # Enrutar cualquier otra petición hacia public/
-    RewriteCond %{REQUEST_URI} !^/guia_academica/public/
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule (.*) public/$1 [L]

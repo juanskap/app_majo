@@ -126,8 +126,8 @@ class Proyecto extends Model
     /** Genera el siguiente código de proyecto */
     public function nextCodigo(): string
     {
-        $stmt = $this->db->query("SELECT COUNT(*) FROM proyectos");
-        $count = (int) $stmt->fetchColumn() + 1;
+        $stmt = $this->db->query("SELECT COALESCE(MAX(id), 0) + 1 FROM proyectos");
+        $count = (int) $stmt->fetchColumn();
         return 'PRJ-' . date('Y') . '-' . str_pad((string) $count, 4, '0', STR_PAD_LEFT);
     }
 
